@@ -80,6 +80,8 @@ Use this when cutting a release or fixing a failed one.
 
 - **Behaviour changed**: edit the doc in place in the same commit as the code, and update `updated` and `verified`.
   Git keeps the old text.
+- **`check` says a doc may be stale**: compare the doc with the code it covers. Fix the doc if it is wrong; then run
+  `docs_index.py verify DOC-n` to stamp today's date and commit. A flag does not always mean the doc is wrong.
 - **A doc is replaced by another**: set `status: superseded` and `superseded_by: DOC-n` in the old doc, `supersedes` in
   the new one, and move the old file to `docs/archive/`.
 - **A feature is removed**: set `status: deprecated`, say what replaced it if anything, and move it to `docs/archive/`.

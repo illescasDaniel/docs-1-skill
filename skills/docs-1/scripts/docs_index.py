@@ -5,6 +5,7 @@ usage: docs_index.py [--docs DIR] write          regenerate DIR/INDEX.md from th
        docs_index.py [--docs DIR] check          report errors (exit 1) and stale docs (warnings)
        docs_index.py [--docs DIR] covers PATH..  list the docs whose `covers` match these files
        docs_index.py [--docs DIR] next-id        print the next free DOC-n id
+       docs_index.py [--docs DIR] verify ID..    stamp `verified: <today> <HEAD>` on docs you re-checked against the code
 """
 import argparse
 import os
@@ -146,7 +147,7 @@ def stale(root, m):
         return None
     spec = [f":(glob){c.rstrip('/') + '/**' if c.endswith('/') else c}" for c in covers]
     since = [f"{verified[1]}..HEAD"] if len(verified) > 1 and git(root, "cat-file", "-e", verified[1]) is not None \
-        else [f"--since={verified[0]}T23:59:59"]
+        else [f"--since={verified[0]}T00:00:00"]     # no usable commit: by date, same-day changes included
     out = git(root, "log", "--format=%h", *since, "--", *spec)
     return None if out is None else [c for c in out.splitlines() if c]
 
@@ -232,10 +233,31 @@ def next_id(docs):
     print(f"DOC-{max(nums, default=0) + 1:03d}")
 
 
+def verify(docs, ids):
+    import datetime
+    stamp = f"{datetime.date.today().isoformat()} {git(docs, 'rev-parse', '--short', 'HEAD') or ''}".strip()
+    found = set()
+    for p, m in load(docs):
+        if not m or m.get("id") not in ids:
+            continue
+        text = p.read_text(encoding="utf-8")
+        head, sep, body = text[4:].partition("\n---\n")
+        if re.search(r"(?m)^verified:.*$", head):
+            head = re.sub(r"(?m)^verified:.*$", f"verified: {stamp}", head, count=1)
+        else:
+            head += f"\nverified: {stamp}"
+        p.write_text("---\n" + head + sep + body, encoding="utf-8")
+        found.add(m["id"])
+        print(f"{m['id']} {shown(docs, p)}: verified {stamp}")
+    for i in sorted(set(ids) - found):
+        print(f"{i}: no such doc")
+    return 0 if found == set(ids) else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--docs", default="docs", help="docs folder (default: docs)")
-    ap.add_argument("command", choices=["write", "check", "covers", "next-id"])
+    ap.add_argument("command", choices=["write", "check", "covers", "next-id", "verify"])
     ap.add_argument("paths", nargs="*")
     a = ap.parse_args()
     docs = Path(a.docs)
@@ -245,6 +267,8 @@ def main():
         write(docs)
     elif a.command == "check":
         sys.exit(check(docs))
+    elif a.command == "verify":
+        sys.exit(verify(docs, a.paths))
     elif a.command == "covers":
         covers(docs, a.paths)
     else:

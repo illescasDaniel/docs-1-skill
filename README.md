@@ -58,6 +58,7 @@ python3 skills/docs-1/scripts/docs_index.py write            # regenerate docs/I
 python3 skills/docs-1/scripts/docs_index.py check            # missing fields, duplicate IDs, broken links, stale docs
 python3 skills/docs-1/scripts/docs_index.py covers src/x.py  # which docs describe this file
 python3 skills/docs-1/scripts/docs_index.py next-id          # next free DOC-n
+python3 skills/docs-1/scripts/docs_index.py verify DOC-012   # stamp a doc you re-checked against the code
 ```
 
 `check` exits with 1 on errors, so it can run in CI. Stale docs are warnings: a change to covered code does not always
@@ -97,7 +98,8 @@ Add this to `AGENTS.md` (or `CLAUDE.md`) so every agent, including ones that do 
 
 Project docs are in `docs/`; start at `docs/INDEX.md` (generated, one line per doc). Cite docs by ID (`DOC-012`).
 Code at HEAD wins over a doc. Before changing code, find the docs that cover it
-(`python3 <docs-1 skill>/scripts/docs_index.py covers <file>`) and update them in the same change, then run
+(`python3 <path to the docs-1 skill>/scripts/docs_index.py covers <file>`; replace the path with where the skill is
+installed, for example `.claude/skills/docs-1`) and update them in the same change, then run
 `docs_index.py write` and `check`. Full protocol: the `docs-1` skill.
 ```
 
@@ -115,7 +117,12 @@ A formal, reviewed decision can be a `decision` doc. The informal "we tried X, t
 
 ## Evidence
 
-One small test (38 docs, 14 questions): answers were already at the ceiling without docs-1 (2.00 against 1.98), so it shows no accuracy gain at that size. Details and what is untested: [docs/benchmark.md](docs/benchmark.md).
+Two tests ([docs/benchmark.md](docs/benchmark.md)). On answer accuracy docs-1 ties plain docs, on 38 real docs and on
+309 synthetic ones: an agent with grep already finds the facts. What it adds is measurable elsewhere: `check` flagged
+all 15 deliberately outdated docs (and 6 harmless code changes, none of 263 untouched docs), and "which docs cover this
+file" was answered completely in about 3 fewer turns. It costs about one extra turn per ordinary question. The single
+most useful line against outdated docs is the trust rule, "code at HEAD wins over a doc", which the `AGENTS.md`
+paragraph above carries.
 
 ## Contributing
 
