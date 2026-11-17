@@ -136,18 +136,24 @@ SkillSpector 2.13.3, run directly because SkillEvaluator's own launch of it did 
 
 | Check | Result |
 | --- | --- |
-| Quality score | B, 88.5/100 (correctness 85, discoverability 85, reliability 90, efficiency 100) |
-| LLM rubric score | 83.6/100 |
+| Quality score | A, 93.5/100 (correctness 85, discoverability 95, reliability 100, efficiency 100); was B, 88.5 before the Purpose, Examples, Limitations and Troubleshooting sections |
+| LLM rubric score (previous revision) | 83.6/100 |
 | Tier 1 (schema, version, license, code risk, lint, unicode) | 11 of 12 checks passed, none failed; the 12th (security scan) is the SkillSpector run below |
-| Tier 2 (duplicate context) | passed, no duplicated content found |
+| Tier 2 (duplicate context, previous revision) | passed, no duplicated content found |
 | PII and secrets scans | passed |
-| SkillSpector (with LLM review) | risk score 35, MEDIUM, recommendation CAUTION; 1 finding confirmed (no declared permissions), 4 disagreed on review |
+| SkillSpector (with LLM review, previous revision) | risk score 35, MEDIUM, recommendation CAUTION; 1 finding confirmed (no declared permissions), 4 disagreed on review |
 
 The confirmed SkillSpector finding is accepted: the skill reads and edits Markdown files and runs one local script, and does not declare a tool allowlist, which is left to the agent runtime. The other findings (broad description, `subprocess` call to read-only `git`) were reviewed and rejected.
 
-Not run: Tier 3, the live agent evaluation (it needs Docker). The remaining quality notes are generic ones that do not
-fit this skill: no `## Purpose`/`## Troubleshooting` headings, a long description that carries the trigger conditions, and a
-`version` field that is set under `metadata:` rather than at the top level.
+The latest revision was re-checked with the keyless checks only (quality score, Tier 1 without the LLM rubric, and
+SkillSpector without its LLM review, which reported the same findings as before); rows marked "previous revision" come
+from the revision before it.
+
+Not run yet: Tier 3, the live agent evaluation (with-skill vs. without-skill runs of a coding agent; it works with
+rootless Podman through the Docker CLI, but needs paid model credit). The remaining quality notes are generic ones that
+do not fit this skill: a long description that carries the trigger conditions, a `version` field that is set under
+`metadata:` rather than at the top level (the Agent Skills spec has no top-level `version`), and `run_script()` examples,
+which belong to another agent harness.
 
 Reproduce:
 
