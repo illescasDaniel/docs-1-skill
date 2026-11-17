@@ -93,6 +93,13 @@ class GlobTests(unittest.TestCase):
         self.assertTrue(self.match("src/auth", "src/auth/token.py"))
         self.assertFalse(self.match("src/auth", "src/authz/token.py"))
 
+    def test_hidden_paths_and_dot_slash_prefix(self):
+        for prefix in ("", "./"):
+            self.assertTrue(self.match(prefix + ".mcp.json", ".mcp.json"))
+            self.assertTrue(self.match(prefix + ".github/workflows/*.yml", ".github/workflows/ci.yml"))
+            self.assertFalse(self.match(prefix + ".mcp.json", "mcp.json"))
+            self.assertFalse(self.match(prefix + ".github/workflows/*.yml", "github/workflows/ci.yml"))
+
     def test_trailing_slash_covers_everything_below(self):
         self.assertTrue(self.match("src/", "src/deep/er/x.py"))
 
@@ -312,6 +319,13 @@ class CoversTests(Project):
         r = self.run_cli("covers", str(self.root / "config.yml"), "src/x.py")
         self.assertIn("DOC-002", r.stdout)
         self.assertNotIn("DOC-001", r.stdout)
+
+    def test_hidden_files_and_workflows_map_to_docs(self):
+        self.write("docs/hidden.md", doc("DOC-003", "Hidden", "Hidden config", extra="covers: [.mcp.json, .github/workflows/*.yml]"))
+        for path in (".mcp.json", "./.mcp.json", ".github/workflows/ci.yml", "./.github/workflows/ci.yml"):
+            with self.subTest(path=path):
+                self.assertIn("DOC-003", self.run_cli("covers", path).stdout)
+        self.assertNotIn("DOC-003", self.run_cli("covers", "mcp.json").stdout)
 
     def test_no_match_prints_nothing(self):
         r = self.run_cli("covers", "unrelated/file.py")
