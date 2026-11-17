@@ -24,6 +24,8 @@ Project documentation that AI coding agents can navigate and maintain. Each Mark
 
 ## How it works
 
+![docs-1 workflow: describe, index and review project documentation](assets/infographic.png)
+
 | In `docs/` | Purpose |
 | --- | --- |
 | 🗂️ `INDEX.md` | Generated index of doc IDs, titles and summaries |
