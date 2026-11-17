@@ -24,7 +24,7 @@ Project documentation that AI coding agents can navigate and maintain. Each Mark
 
 ## How it works
 
-![docs-1 workflow: describe, index and review project documentation](assets/infographic.png)
+<img alt="docs-1 workflow: describe, index and review project documentation" src="assets/infographic.png" height="350">
 
 | In `docs/` | Purpose |
 | --- | --- |
@@ -119,7 +119,9 @@ Python 3.9+ and Git for history-based stale checks; the script uses only the sta
 
 ## Evaluation
 
-The keyless [NVIDIA SkillEvaluator](https://github.com/NVIDIA/SkillEvaluator) quality check gave **A, 93.5/100** on the revision checked on 2026-11-17. SkillSpector reported **medium risk / caution**; its findings and review are in the evaluation details. Some checks apply to the preceding revision, and the paid Tier 3 live-agent evaluation was not run.
+[![NVIDIA SkillEvaluator quality A, 93.5 out of 100; keyless security scan low risk](assets/evaluation.svg)](docs/evaluation.md)
+
+The keyless [NVIDIA SkillEvaluator](https://github.com/NVIDIA/SkillEvaluator) quality check gave **A, 93.5/100** on the revision checked on 2026-11-17. The latest keyless SkillSpector scan reported **low risk / caution**; its findings and limits are in the evaluation details. Some checks apply to the preceding revision. Tier 3 was attempted, but produced no valid live-agent result.
 
 In separate agent tests, ordinary answer accuracy was similar with and without docs-1. The checker flagged all **15 deliberately outdated docs**, alongside **6 harmless changes**; locating docs for a file took about three fewer turns in the synthetic test. These are limited experiments, not a general guarantee. [Evaluation details](docs/evaluation.md) · [Benchmark method and results](docs/benchmark.md)
 
