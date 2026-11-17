@@ -1,31 +1,40 @@
-# docs-1
+<p align="center">
+  <img src="assets/icon.svg" alt="docs-1 icon" width="96" height="96">
+</p>
 
-Project documentation that AI coding agents can find their way through and know when to trust. Each doc covers one
-subject and starts with a small frontmatter block: a stable ID to cite (`DOC-012`), a one-line summary, a type, a
-status, dates, and the code paths it describes. A script builds `docs/INDEX.md` (one line per doc) from that
-frontmatter and flags docs whose code changed after they were last checked. It is an
-[Agent Skill](https://agentskills.io) (a `SKILL.md`, a doc template and one standard-library script), so it works in
-Claude Code, Codex, Cursor and any agent that can read files.
+<h1 align="center">docs-1</h1>
 
-- **Read the index, open one doc.** The agent reads a short index and opens only the doc whose summary answers the
-  question, instead of grepping every Markdown file.
-- **Stale docs are visible.** `covers` says which files a doc describes and `verified` says at which commit it was last
-  checked. `docs_index.py check` lists docs whose covered files changed since then.
-- **Docs for the file you are editing.** `docs_index.py covers src/auth/token.py` lists the docs to update in the same
-  change.
-- **IDs survive moves.** Cite `DOC-012` in code comments, PRs and other docs; the path can change.
-- **History is kept.** Replaced docs are marked `superseded` with a pointer to the new one and moved to `docs/archive/`.
+<p align="center">
+  <b>Docs that AI coding agents can find their way through, and know when to trust.</b>
+</p>
 
-## The files
+<p align="center">
+  <a href="https://github.com/illescasDaniel/docs-1-skill/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/illescasDaniel/docs-1-skill/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9%2B-blue.svg">
+  <img alt="Dependencies: none" src="https://img.shields.io/badge/dependencies-none%20(stdlib)-brightgreen.svg">
+  <a href="https://agentskills.io"><img alt="Agent Skill" src="https://img.shields.io/badge/Agent%20Skill-SKILL.md-6f42c1.svg"></a>
+</p>
 
-```
-docs/
-  INDEX.md               generated: one line per doc (ID, title, type, summary), grouped by area; History last
-  <area>/<slug>.md       one subject per doc
-  archive/               deprecated and superseded docs
-```
+Project documentation that AI coding agents can navigate and maintain. Each Markdown doc has a stable ID, a summary, status and the code paths it covers. A small script generates an index and flags covered code changes for review.
 
-A doc:
+- **Find the right doc:** a short index points agents to each subject.
+- **Review changes:** `covers` locates related docs; `check` flags potentially stale ones.
+- **Preserve context:** stable IDs survive moves, and superseded docs remain in the archive.
+
+## How it works
+
+| In `docs/` | Purpose |
+| --- | --- |
+| 🗂️ `INDEX.md` | Generated index of doc IDs, titles and summaries |
+| 📝 `<area>/<slug>.md` | One subject per document |
+| 🧭 `<area>/INDEX.md` | Area index when the collection grows past 150 docs |
+| 🗄️ `archive/` | Deprecated and superseded documents |
+
+The script also discovers docs-1 frontmatter in Markdown files elsewhere in the repository.
+
+<details>
+<summary>See an example document</summary>
 
 ```markdown
 ---
@@ -51,31 +60,18 @@ Use this when cutting a release or fixing a failed one.
 The types follow [Diátaxis](https://diataxis.fr), plus `decision` (one decision record) and `runbook`. Past 150 docs,
 the script gives each area its own `INDEX.md` and the main index lists the areas.
 
-## The script
+</details>
 
-```bash
-python3 skills/docs-1/scripts/docs_index.py write            # regenerate docs/INDEX.md
-python3 skills/docs-1/scripts/docs_index.py check            # missing fields, duplicate IDs, broken links, stale docs
-python3 skills/docs-1/scripts/docs_index.py covers src/x.py  # which docs describe this file
-python3 skills/docs-1/scripts/docs_index.py next-id          # next free DOC-n
-python3 skills/docs-1/scripts/docs_index.py verify DOC-012   # stamp a doc you re-checked against the code
-```
-
-`check` exits with 1 on errors, so it can run in CI. Stale docs are warnings: a change to covered code does not always
-make a doc wrong.
-
-## Install
-
-### Any agent: the `skills` CLI
+## Quick start
 
 ```bash
 npx skills add illescasDaniel/docs-1-skill
 ```
 
-It asks which agents to install for and whether to install into the current project or globally. Non-interactive:
-`npx skills add illescasDaniel/docs-1-skill -a claude-code -a codex -y`, plus `-g` for global.
+Ask your agent **“set up docs-1 for this project”**. It inventories existing docs, proposes a plan, adds frontmatter and builds the index. Existing files stay in place unless you agree to move them.
 
-### By hand
+<details>
+<summary>Manual installation and agent instructions</summary>
 
 Copy the `skills/docs-1` folder into your agent's skills directory.
 
@@ -84,12 +80,6 @@ Copy the `skills/docs-1` folder into your agent's skills directory.
 | Claude Code | `.claude/skills/docs-1/` | `~/.claude/skills/docs-1/` |
 | Codex | `.agents/skills/docs-1/` | `~/.agents/skills/docs-1/` |
 | Cursor | `.cursor/skills/docs-1/` | `~/.cursor/skills/docs-1/` |
-
-## Use it
-
-Ask your agent: *"set up docs-1 for this project"*. It lists the existing docs, shows you the plan, adds frontmatter
-(in place, unless you agree to move files), and generates the index. After that, the skill's description tells the
-agent to use it when writing or changing docs and when looking for the docs of a file.
 
 Add this to `AGENTS.md` (or `CLAUDE.md`) so every agent, including ones that do not load skills, starts at the index:
 
@@ -103,64 +93,46 @@ installed, for example `.claude/skills/docs-1`) and update them in the same chan
 `docs_index.py write` and `check`. Full protocol: the `docs-1` skill.
 ```
 
-## With memory-1
+</details>
 
-[memory-1](https://github.com/illescasDaniel/memory-1-skill) and docs-1 do different jobs, so they are separate skills:
+<details>
+<summary>Script commands</summary>
 
-| | docs-1 | memory-1 |
-|---|---|---|
-| Holds | how the system works and how to work with it, now | why it is this way, what changed, preferences, status |
-| Edited | in place; git keeps old versions | append-only facts; a change supersedes the old note |
-| Written by | people and agents, on purpose | agents, as a side effect of working |
+```bash
+python3 skills/docs-1/scripts/docs_index.py write            # regenerate docs/INDEX.md
+python3 skills/docs-1/scripts/docs_index.py check            # missing fields, duplicate IDs, broken links, stale docs
+python3 skills/docs-1/scripts/docs_index.py covers src/x.py  # which docs describe this file
+python3 skills/docs-1/scripts/docs_index.py next-id          # next free DOC-n
+python3 skills/docs-1/scripts/docs_index.py verify DOC-012   # stamp a doc you re-checked against the code
+```
 
-A formal, reviewed decision can be a `decision` doc. The informal "we tried X, the user preferred Y" belongs in memory.
+`check` exits with 1 on errors, so it can run in CI. Stale docs are warnings: a change to covered code does not always
+make a doc wrong.
 
-## Evidence
+</details>
 
-Two tests ([docs/benchmark.md](docs/benchmark.md)). On answer accuracy docs-1 ties plain docs, on 38 real docs and on
-309 synthetic ones: an agent with grep already finds the facts. What it adds is measurable elsewhere: `check` flagged
-all 15 deliberately outdated docs (and 6 harmless code changes, none of 263 untouched docs), and "which docs cover this
-file" was answered completely in about 3 fewer turns. It costs about one extra turn per ordinary question. The single
-most useful line against outdated docs is the trust rule, "code at HEAD wins over a doc", which the `AGENTS.md`
-paragraph above carries.
+## Requirements and limits
 
-## Contributing
-
-Issues and pull requests are welcome. The skill is deliberately short: if a change makes `SKILL.md` longer, it should
-earn it.
+Python 3.9+ and Git for history-based stale checks; the script uses only the standard library. Without Git, other checks and index generation remain available. A changed covered file is a review hint, not proof a doc is wrong.
 
 ## Evaluation
 
-Checked on 2026-11-17 with [NVIDIA SkillEvaluator](https://github.com/NVIDIA/SkillEvaluator) 0.9.0 (security scan by
-SkillSpector 2.13.3, run directly because SkillEvaluator's own launch of it did not complete on this setup).
+The keyless [NVIDIA SkillEvaluator](https://github.com/NVIDIA/SkillEvaluator) quality check gave **A, 93.5/100** on the revision checked on 2026-11-17. SkillSpector reported **medium risk / caution**; its findings and review are in the evaluation details. Some checks apply to the preceding revision, and the paid Tier 3 live-agent evaluation was not run.
 
-| Check | Result |
-| --- | --- |
-| Quality score | A, 93.5/100 (correctness 85, discoverability 95, reliability 100, efficiency 100); was B, 88.5 before the Purpose, Examples, Limitations and Troubleshooting sections |
-| LLM rubric score (previous revision) | 83.6/100 |
-| Tier 1 (schema, version, license, code risk, lint, unicode) | 11 of 12 checks passed, none failed; the 12th (security scan) is the SkillSpector run below |
-| Tier 2 (duplicate context, previous revision) | passed, no duplicated content found |
-| PII and secrets scans | passed |
-| SkillSpector (with LLM review, previous revision) | risk score 35, MEDIUM, recommendation CAUTION; 1 finding confirmed (no declared permissions), 4 disagreed on review |
+In separate agent tests, ordinary answer accuracy was similar with and without docs-1. The checker flagged all **15 deliberately outdated docs**, alongside **6 harmless changes**; locating docs for a file took about three fewer turns in the synthetic test. These are limited experiments, not a general guarantee. [Evaluation details](docs/evaluation.md) · [Benchmark method and results](docs/benchmark.md)
 
-The confirmed SkillSpector finding is accepted: the skill reads and edits Markdown files and runs one local script, and does not declare a tool allowlist, which is left to the agent runtime. The other findings (broad description, `subprocess` call to read-only `git`) were reviewed and rejected.
-
-The latest revision was re-checked with the keyless checks only (quality score, Tier 1 without the LLM rubric, and
-SkillSpector without its LLM review, which reported the same findings as before); rows marked "previous revision" come
-from the revision before it.
-
-Not run yet: Tier 3, the live agent evaluation (with-skill vs. without-skill runs of a coding agent; it works with
-rootless Podman through the Docker CLI, but needs paid model credit). The remaining quality notes are generic ones that
-do not fit this skill: a long description that carries the trigger conditions, a `version` field that is set under
-`metadata:` rather than at the top level (the Agent Skills spec has no top-level `version`), and `run_script()` examples,
-which belong to another agent harness.
-
-Reproduce:
+## Tests
 
 ```bash
-uvx --python 3.13 --from 'skillevaluator[all]' skillevaluator quality-check ./skills/docs-1
+python3 -m unittest discover -s tests -v
 ```
+
+The free, standard-library tests exercise the scripts using temporary fixtures. They require no API key and live outside the installable skill folder. They do not measure whether an agent follows the skill. See the [CI workflow](.github/workflows/ci.yml) for the test matrix.
+
+## Related
+
+[memory-1](https://github.com/illescasDaniel/memory-1-skill) keeps decisions, preferences and project history; docs-1 describes how the system works now.
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+[MIT](LICENSE) · Issues and pull requests are welcome.
